@@ -1,0 +1,21 @@
+My first attempt at an PDL::R module. This module exports the
+mathematical functions provided in the src/nmath/standalone directory of
+the R source code.
+
+This module depends on another of my modules PDL::NamedArgs.
+
+
+Usage
+
+   use PDL::R::math
+
+
+You can look at rmath.pod for some documentation (though its not fully
+up to date) and you can look at the code in rmath_auto.pd is see what
+functions are available.
+
+Alternatively you can look at the code in testPDL.pl which exercises all
+of the functions provided in this library.
+
+
+--John Cavanaugh (john-cavanaugh@home.com)

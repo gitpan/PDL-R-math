@@ -1,0 +1,16 @@
+./CREDITS
+./INSTALL
+./MANIFEST
+./Makefile.PL
+./README
+./TODO
+./include/
+./include/Rmath.h
+./pm_to_blib
+./rmath.pd
+./rmath_auto.pd
+./testPDL.pl
+./testR.R
+./outputPDL
+./outputR
+./rmath.pod

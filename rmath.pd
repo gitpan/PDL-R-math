@@ -1,0 +1,101 @@
+our $VERSION = '0.11';
+pp_bless('PDL::R::math');  # Put in our namespace not PDL's
+
+#pp_setversion(0.10);
+
+pp_addpm({At=>Top},<<'EOD');
+
+=head1 NAME
+
+PDL::R::math - routines from statistics language, R,  for PDL
+
+=head1 DESCRIPTION
+
+This module provides access to many of the statistical functions
+available in the nmath library of the R statistical language.
+
+It is assumed that users of this library are already familar with the
+R language. The documentation will be sparse and where appropriate
+will focus on the differences between pure R and PDL:R.
+
+=head1 SYNOPSIS
+
+ use PDL::R::math;
+
+=head1 CALLING CONVENTIONS
+
+A key point in understanding PDL::R is that the calling convention for
+functions is slightly different than pure R.  
+
+Specifically there are no implicit or default values for functions,
+nor does PDL::R support named parameters.  [Though this may change
+at a later date...]
+
+For example in R the documentation for the dunif functions is:
+
+   dunif(x, min=0, max=1, log=FALSE)   # Pure R
+
+Which would allow for dunif to be called from pure R as:
+
+   dunif(x)                        # Pure R, default values
+   dunif(x,0,5,0)                  # Pure R, all values defined
+   dunif(x,max=10,min=0,log=TRUE)  # Pure R, named parameters
+
+In PDL::R, you *must* specify *all* of the parameters in the order
+they are defined in the documentation.
+
+The functions above would be written in PDL::R as:
+
+   dunif(x,0,1,0)     # PDL::R, specifying all parameters
+   dunif(x,0,5,0)     # PDL::R, specifying all parameters
+   dunif(x,0,10,1)    # PDL::R, no named parameters
+
+
+=cut
+EOD
+
+pp_addpm({At=>'Bot'},<<'EOD'); 
+
+=head1 AUTHOR
+
+This document and and the PDL::R interface are copyrighted: Copyright
+(C) 2001 John Cavanaugh, Copyright (C) 1998 John Lapeyre under the terms
+in the file COPYING in the PDL distribution.
+
+This document is a modified version of the documentation found in the R
+distribution. It is modified only to provide a description of the PDL
+calling sytax.
+
+The R language including all sources and documentation is copyrighted
+under the terms of the Gnu Public License: R : A Computer Langage for
+Statistical Data Analysis Copyright (C) 1995, 1996 Robert Gentleman and
+Ross Ihaka
+
+The PDL language is copyrighted: Copyright (C) R.J.R. Williams 1997
+(rjrw@ast.leeds.ac.uk), Karl Glazebrook (kgb@aaoepp.aao.gov.au) and
+Tuomas J. Lukka (Tuomas.Lukka@helsinki.fi).
+
+All rights reserved. There is no warranty. You are allowed to
+redistribute this software / documentation under certain conditions. For
+details, see the file COPYING in the PDL distribution. 
+
+=head1 BUGS
+
+ - Doesnt implement all of the functions of R.
+ - Doesnt handle default values or named parameters.
+
+=cut
+EOD
+
+pp_addhdr('
+#define MATHLIB_STANDALONE 
+#include "Rmath.h"
+');
+
+use PDL;
+use PDL::Core;
+use PDL::NamedArgs;
+use Data::Dumper;
+require 'rmath_auto.pd';  
+
+pp_done();

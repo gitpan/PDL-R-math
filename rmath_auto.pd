@@ -1,0 +1,1418 @@
+#!/bin/perl
+pp_def("norm_rand",
+       Pars => ' double [o]ppret()',
+       Code => ' extern double norm_rand(void);;
+                 $ppret() = norm_rand(); ',
+      );
+
+pp_def("unif_rand",
+       Pars => ' double [o]ppret()',
+       Code => ' extern double unif_rand(void);;
+                 $ppret() = unif_rand(); ',
+      );
+
+pp_def("exp_rand",
+       Pars => ' double [o]ppret()',
+       Code => ' extern double exp_rand(void);;
+                 $ppret() = exp_rand(); ',
+      );
+
+pp_def("set_seed",
+       Pars => 'int a(); int b();',
+       Code => ' extern void set_seed(unsigned int, unsigned int);;
+                set_seed((unsigned)$a(),(unsigned)$b());; ',
+      );
+
+# Note: Matches R calling convention
+pp_def("dnorm",
+       Pars => 'x(); mean(); sd(); log();  double [o]ppret()',
+       Code => 'extern double dnorm4(double, double, double, int);;
+                $ppret() = dnorm4((double)$x(),(double)$mean(),(double)$sd(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::dnorm {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, mean=0, sd=1, log=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_dnorm_int($argHash{x},$argHash{mean},$argHash{sd},$argHash{log},$ppret);
+                       return $ppret; } ',
+      );
+
+# Note: Matches R calling convention
+pp_def("pnorm",
+       Pars => 'q(); mean(); sd(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double pnorm5(double, double, double, int, int);;
+                $ppret() = pnorm5((double)$q(),(double)$mean(),(double)$sd(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::pnorm {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, mean=0, sd=1, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_pnorm_int($argHash{q},$argHash{mean},$argHash{sd},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+# Note: Matches R calling convention
+pp_def("qnorm",
+       Pars => 'p(); mean(); sd(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qnorm5(double, double, double, int, int);;
+                $ppret() = qnorm5((double)$p(),(double)$mean(),(double)$sd(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qnorm {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, mean=0, sd=1, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_qnorm_int($argHash{p},$argHash{mean},$argHash{sd},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+# Note: Matches R calling convention
+pp_def("rnorm",
+       Pars => 'N(n); mean(); sd();  double [o]ppret(n)',
+       Code => 'extern double rnorm(double, double);;
+                loop(n) %{ $ppret() = rnorm((double)$mean(),(double)$sd()); %} ',
+       PMCode => '
+            sub PDL::R::math::rnorm {
+      #         my ($status,%argHash) = parseArgs("x, mean=0, sd=1, log=0", @_);
+               my ($i,$a,$b) = @_;
+               my $c=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_rnorm_int($i,$a,$b,$c);
+               return $c;
+            } ',
+      );
+
+#pp_def("pnorm_both",
+#       Pars => 'a(); b(); c(); d(); e();  double [o]ppret()',
+#       Code => '
+#            extern void pnorm_both(double, double *, double *, int, int);/* both tails */;
+#            $ppret() = pnorm_both((double)$a(),(double)$b(),(double)$c(),(int)$d(),(int)$e());
+#');
+
+pp_def("dunif",
+       Pars => 'x(); min(); max(); log();  double [o]ppret()',
+       Code => 'extern double dunif(double, double, double, int);;
+                $ppret() = dunif((double)$x(),(double)$min(),(double)$max(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::dunif {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, min=0, max=1, log=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_dunif_int($argHash{x},$argHash{min},$argHash{max},$argHash{log},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("punif",
+       Pars => 'q(); min(); max(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double punif(double, double, double, int, int);;
+                $ppret() = punif((double)$q(),(double)$min(),(double)$max(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::punif {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, min=0, max=1, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_punif_int($argHash{q},$argHash{min},$argHash{max},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("qunif",
+       Pars => 'p(); min(); max(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qunif(double, double, double, int, int);;
+                $ppret() = qunif((double)$p(),(double)$min(),(double)$max(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qunif {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, min=0, max=1, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_qunif_int($argHash{p},$argHash{min},$argHash{max},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("runif",
+       Pars => 'N(n); min(); max();  double [o]ppret(n)',
+       Code => 'extern double runif(double, double);;
+                loop(n) %{ $ppret() = runif((double)$min(),(double)$max()); %} ',
+       PMCode => '
+            sub PDL::R::math::runif {
+               my ($i,$a,$b) = @_;
+               my $c=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_runif_int($i,$a,$b,$c);
+               return $c;
+            } ',
+      );
+
+pp_def("dgamma",
+       Pars => 'x(); shape(); scale(); log();  double [o]ppret()',
+       Code => 'extern double dgamma(double, double, double, int);;
+                $ppret() = dgamma((double)$x(),(double)$shape(),(double)$scale(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::dgamma {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, shape, scale=1, log=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_dgamma_int($argHash{x},$argHash{shape},$argHash{scale},$argHash{log},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("pgamma",
+       Pars => 'q(); shape(); scale(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double pgamma(double, double, double, int, int);;
+                $ppret() = pgamma((double)$q(),(double)$shape(),(double)$scale(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::pgamma {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, shape, scale=1, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_pgamma_int($argHash{q},$argHash{shape},$argHash{scale},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("qgamma",
+       Pars => 'p(); shape(); scale(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qgamma(double, double, double, int, int);;
+                $ppret() = qgamma((double)$p(),(double)$shape(),(double)$scale(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qgamma {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, shape, scale=1, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_qgamma_int($argHash{p},$argHash{shape},$argHash{scale},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("rgamma",
+       Pars => 'N(n); shape(); scale();  double [o]ppret(n)',
+       Code => 'extern double rgamma(double, double);;
+                loop(n) %{ $ppret() = rgamma((double)$shape(),(double)$scale()); %} ',
+       PMCode => '
+            sub PDL::R::math::rgamma {
+               my ($i,$a,$b) = @_;
+               my $c=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_rgamma_int($i,$a,$b,$c);
+               return $c;
+            } ',
+      );
+
+pp_def("dbeta",
+       Pars => 'x(); shapeOne(); shapeTwo(); log();  double [o]ppret()',
+       Code => 'extern double dbeta(double, double, double, int);;
+                $ppret() = dbeta((double)$x(),(double)$shapeOne(),(double)$shapeTwo(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::dbeta {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, shape1, shape2, ncp=0, log=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       if ($argHash{ncp})
+                         { &PDL::R::math::dnbeta($argHash{x},$argHash{shape1},$argHash{shape2},$argHash{ncp},$argHash{log},$ppret); }
+                       else
+                         { &PDL::R::math::_dbeta_int($argHash{x},$argHash{shape1},$argHash{shape2},$argHash{log},$ppret); }
+                       return $ppret; } ',
+      );
+
+pp_def("pbeta",
+       Pars => 'q(); shapeOne(); shapeTwo(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double pbeta(double, double, double, int, int);;
+                $ppret() = pbeta((double)$q(),(double)$shapeOne(),(double)$shapeTwo(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::pbeta {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, shape1, shape2, ncp=0, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       if ($argHash{ncp})
+                         { &PDL::R::math::pnbeta($argHash{q},$argHash{shape1},$argHash{shape2},$argHash{ncp},$argHash{lower_tail},$argHash{log_p},$ppret); }
+                       else
+                         { &PDL::R::math::_pbeta_int($argHash{q},$argHash{shape1},$argHash{shape2},$argHash{lower_tail},$argHash{log_p},$ppret); }
+                       return $ppret; } ',
+      );
+
+pp_def("qbeta",
+       Pars => 'p(); shapeOne(); shapeTwo(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qbeta(double, double, double, int, int);;
+                $ppret() = qbeta((double)$p(),(double)$shapeOne(),(double)$shapeTwo(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qbeta {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, shape1, shape2, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_qbeta_int($argHash{p},$argHash{shape1},$argHash{shape2},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("rbeta",
+       Pars => 'N(n); shapeOne(); shapeTwo();  double [o]ppret(n)',
+       Code => 'extern double rbeta(double, double);;
+                loop(n) %{ $ppret() = rbeta((double)$shapeOne(),(double)$shapeTwo()); %} ',
+       PMCode => '
+            sub PDL::R::math::rbeta {
+               my ($i,$a,$b) = @_;
+               my $c=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_rbeta_int($i,$a,$b,$c);
+               return $c;
+            } ',
+      );
+
+#pp_def("pbeta_raw",
+#       Pars => 'a(); b(); c(); d();  double [o]ppret()',
+#       Code => '
+#            extern double pbeta_raw(double, double, double, int);;
+#            $ppret() = pbeta_raw((double)$a(),(double)$b(),(double)$c(),(int)$d());
+#');
+
+pp_def("dlnorm",
+       Pars => 'x(); meanlog(); sdlog(); log();  double [o]ppret()',
+       Code => 'extern double dlnorm(double, double, double, int);;
+                $ppret() = dlnorm((double)$x(),(double)$meanlog(),(double)$sdlog(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::dlnorm {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, meanlog=0, sdlog=1, log=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_dlnorm_int($argHash{x},$argHash{meanlog},$argHash{sdlog},$argHash{log},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("plnorm",
+       Pars => 'q(); meanlog(); sdlog(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double plnorm(double, double, double, int, int);;
+                $ppret() = plnorm((double)$q(),(double)$meanlog(),(double)$sdlog(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::plnorm {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, meanlog=0, sdlog=1, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_plnorm_int($argHash{q},$argHash{meanlog},$argHash{sdlog},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("qlnorm",
+       Pars => 'p(); meanlog(); sdlog(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qlnorm(double, double, double, int, int);;
+                $ppret() = qlnorm((double)$p(),(double)$meanlog(),(double)$sdlog(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qlnorm {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, meanlog=0, sdlog=1, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_qlnorm_int($argHash{p},$argHash{meanlog},$argHash{sdlog},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("rlnorm",
+       Pars => 'N(n); meanlog(); sdlog();  double [o]ppret(n)',
+       Code => 'extern double rlnorm(double, double);;
+                loop(n) %{ $ppret() = rlnorm((double)$meanlog(),(double)$sdlog()); %} ',
+       PMCode => '
+            sub PDL::R::math::rlnorm {
+               my ($i,$a,$b) = @_;
+               my $c=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_rlnorm_int($i,$a,$b,$c);
+               return $c;
+            } ',
+      );
+
+pp_def("dchisq",
+       Pars => 'x(); df(); log();  double [o]ppret()',
+       Code => 'extern double dchisq(double, double, int);;
+                $ppret() = dchisq((double)$x(),(double)$df(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::dchisq {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, df, ncp=0, log=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       if ($argHash{ncp})
+                         { &PDL::R::math::dnchisq($argHash{x},$argHash{df},$argHash{ncp},$argHash{log},$ppret); }
+                       else
+                         { &PDL::R::math::_dchisq_int($argHash{x},$argHash{df},$argHash{log},$ppret); }
+                       return $ppret; } ',
+      );
+
+pp_def("pchisq",
+       Pars => 'q(); df(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double pchisq(double, double, int, int);;
+                $ppret() = pchisq((double)$q(),(double)$df(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::pchisq {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, df, ncp=0, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       if ($argHash{ncp})
+                         { &PDL::R::math::pnchisq($argHash{q},$argHash{df},$argHash{ncp},$argHash{lower_tail},$argHash{log_p},$ppret); }
+                       else
+                         { &PDL::R::math::_pchisq_int($argHash{q},$argHash{df},$argHash{lower_tail},$argHash{log_p},$ppret); }
+                       return $ppret; } ',
+      );
+
+pp_def("qchisq",
+       Pars => 'p(); df(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qchisq(double, double, int, int);;
+                $ppret() = qchisq((double)$p(),(double)$df(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qchisq {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, df, ncp=0, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       if ($argHash{ncp})
+                         { &PDL::R::math::qnchisq($argHash{p},$argHash{df},$argHash{ncp},$argHash{lower_tail},$argHash{log_p},$ppret); }
+                       else
+                         { &PDL::R::math::_qchisq_int($argHash{p},$argHash{df},$argHash{lower_tail},$argHash{log_p},$ppret); }
+                       return $ppret; } ',
+      );
+
+pp_def("rchisq",
+       Pars => 'df(n); ncp();  double [o]ppret(n)',
+       Code => 'extern double rchisq(double);;
+                loop(n) %{ $ppret() = rchisq((double)$ncp()); %} ',
+       PMCode => '
+            sub PDL::R::math::rchisq {
+               my ($i,$a) = @_;
+               my $c=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_rchisq_int($i,$a,$c);
+               return $c;
+            } ',
+      );
+
+pp_def("dnchisq",
+       Pars => 'a(); b(); c(); d();  double [o]ppret()',
+       Code => ' extern double dnchisq(double, double, double, int);;
+                 $ppret() = dnchisq((double)$a(),(double)$b(),(double)$c(),(int)$d()); ',
+      );
+
+pp_def("pnchisq",
+       Pars => 'a(); b(); c(); d(); e();  double [o]ppret()',
+       Code => ' extern double pnchisq(double, double, double, int, int);;
+                 $ppret() = pnchisq((double)$a(),(double)$b(),(double)$c(),(int)$d(),(int)$e()); ',
+      );
+
+pp_def("qnchisq",
+       Pars => 'a(); b(); c(); d(); e();  double [o]ppret()',
+       Code => ' extern double qnchisq(double, double, double, int, int);;
+                 $ppret() = qnchisq((double)$a(),(double)$b(),(double)$c(),(int)$d(),(int)$e()); ',
+      );
+
+#pp_def("rnchisq",
+#       Pars => 'i(n); a(); b();  double [o]ppret(n)',
+#       Code => '
+#            extern double rnchisq(double, double);;
+#                loop(n) %{ $ppret() = rnchisq((double)$a(),(double)$b()); %}
+#',
+#       PMCode => '
+#            sub PDL::R::rnchisq {
+#               my ($i,$a,$b) = @_;
+#               my $c=PDL->null;
+#               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+#               &PDL::R::_rnchisq_int($i,$a,$b,$c);
+#               return $c;
+#            }
+#');
+
+
+pp_def("df",
+       Pars => 'x(); dfOne(); dfTwo(); log();  double [o]ppret()',
+       Code => 'extern double df(double, double, double, int);;
+                $ppret() = df((double)$x(),(double)$dfOne(),(double)$dfTwo(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::df {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, df1, df2, log=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_df_int($argHash{x},$argHash{df1},$argHash{df2},$argHash{log},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("pf",
+       Pars => 'q(); dfOne(); dfTwo(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double pf(double, double, double, int, int);;
+                $ppret() = pf((double)$q(),(double)$dfOne(),(double)$dfTwo(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::pf {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, df1, df2, ncp=0, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       if ($argHash{ncp})
+                         { &PDL::R::math::pnf($argHash{q},$argHash{df1},$argHash{df2},$argHash{ncp},$argHash{lower_tail},$argHash{log_p},$ppret); }
+                       else
+                         { &PDL::R::math::_pf_int($argHash{q},$argHash{df1},$argHash{df2},$argHash{lower_tail},$argHash{log_p},$ppret); }
+                       return $ppret; } ',
+      );
+
+pp_def("qf",
+       Pars => 'p(); dfOne(); dfTwo(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qf(double, double, double, int, int);;
+                $ppret() = qf((double)$p(),(double)$dfOne(),(double)$dfTwo(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qf {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, df1, df2, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_qf_int($argHash{p},$argHash{df1},$argHash{df2},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("rf",
+       Pars => 'N(n); dfOne(); dfTwo();  double [o]ppret(n)',
+       Code => 'extern double rf(double, double);;
+                loop(n) %{ $ppret() = rf((double)$dfOne(),(double)$dfTwo()); %} ',
+       PMCode => '
+            sub PDL::R::math::rf {
+               my ($i,$a,$b) = @_;
+               my $c=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_rf_int($i,$a,$b,$c);
+               return $c;
+            } ',
+      );
+
+pp_def("dt",
+       Pars => 'x(); df(); log();  double [o]ppret()',
+       Code => 'extern double dt(double, double, int);;
+                $ppret() = dt((double)$x(),(double)$df(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::dt {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, df, log=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_dt_int($argHash{x},$argHash{df},$argHash{log},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("pt",
+       Pars => 'q(); df(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double pt(double, double, int, int);;
+                $ppret() = pt((double)$q(),(double)$df(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::pt {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, df, ncp=0, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       if ($argHash{ncp})
+                         { &PDL::R::math::pnt($argHash{q},$argHash{df},$argHash{ncp},$argHash{lower_tail},$argHash{log_p},$ppret); }
+                       else
+                         { &PDL::R::math::_pt_int($argHash{q},$argHash{df},$argHash{lower_tail},$argHash{log_p},$ppret); }
+                       return $ppret; } ',
+      );
+
+pp_def("qt",
+       Pars => 'p(); df(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qt(double, double, int, int);;
+           $ppret() = qt((double)$p(),(double)$df(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qt {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, df, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_qt_int($argHash{p},$argHash{df},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("rt",
+       Pars => 'N(n); df();  double [o]ppret(n)',
+       Code => 'extern double rt(double);;
+                loop(n) %{ $ppret() = rt((double)$df()); %} ',
+       PMCode => '
+            sub PDL::R::math::rt {
+               my ($i,$a) = @_;
+               my $c=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_rt_int($i,$a,$c);
+               return $c;
+            } ',
+      );
+
+pp_def("dbinom",
+       Pars => 'x(); size(); prob(); log();  double [o]ppret()',
+       Code => 'extern double dbinom(double, double, double, int);;
+           $ppret() = dbinom((double)$x(),(double)$size(),(double)$prob(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::dbinom {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, size, prob, log=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_dbinom_int($argHash{x},$argHash{size},$argHash{prob},$argHash{log},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("pbinom",
+       Pars => 'q(); size(); prob(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double pbinom(double, double, double, int, int);;
+           $ppret() = pbinom((double)$q(),(double)$size(),(double)$prob(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::pbinom {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, size, prob, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_pbinom_int($argHash{q},$argHash{size},$argHash{prob},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("qbinom",
+       Pars => 'p(); size(); prob(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qbinom(double, double, double, int, int);;
+           $ppret() = qbinom((double)$p(),(double)$size(),(double)$prob(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qbinom {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, size, prob, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_qbinom_int($argHash{p},$argHash{size},$argHash{prob},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("rbinom",
+       Pars => 'N(n); size(); prob();  double [o]ppret(n)',
+       Code => 'extern double rbinom(double, double);;
+                loop(n) %{ $ppret() = rbinom((double)$size(),(double)$prob()); %} ',
+       PMCode => '
+            sub PDL::R::math::rbinom {
+               my ($i,$a,$b) = @_;
+               my $c=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_rbinom_int($i,$a,$b,$c);
+               return $c;
+            } ',
+      );
+
+pp_def("dcauchy",
+       Pars => 'x(); location(); scale(); log();  double [o]ppret()',
+       Code => 'extern double dcauchy(double, double, double, int);;
+           $ppret() = dcauchy((double)$x(),(double)$location(),(double)$scale(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::dcauchy {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, location=0, scale=1, log=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_dcauchy_int($argHash{x},$argHash{location},$argHash{scale},$argHash{log},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("pcauchy",
+       Pars => 'q(); location(); scale(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double pcauchy(double, double, double, int, int);;
+           $ppret() = pcauchy((double)$q(),(double)$location(),(double)$scale(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::pcauchy {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, location=0, scale=1, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_pcauchy_int($argHash{q},$argHash{location},$argHash{scale},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("qcauchy",
+       Pars => 'p(); location(); scale(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qcauchy(double, double, double, int, int);;
+           $ppret() = qcauchy((double)$p(),(double)$location(),(double)$scale(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qcauchy {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, location=0, scale=1, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_qcauchy_int($argHash{p},$argHash{location},$argHash{scale},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("rcauchy",
+       Pars => 'N(n); location(); scale();  double [o]ppret(n)',
+       Code => 'extern double rcauchy(double, double);;
+               loop(n) %{ $ppret() = rcauchy((double)$location(),(double)$scale()); %} ',
+       PMCode => '
+            sub PDL::R::math::rcauchy {
+               my ($i,$a,$b) = @_;
+               my $c=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_rcauchy_int($i,$a,$b,$c);
+               return $c;
+            } ',
+      );
+
+# Note: This function matches the R calling convention of dexp
+#       and not the pure library version (rate vs 1/rate)
+pp_def("dexp",
+       Pars => 'x(); rate(); log();  double [o]ppret()',
+       Code => 'extern double dexp(double, double, int);;
+           $ppret() = dexp((double)$x(),1/(double)$rate(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::dexp {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, rate=1, log=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_dexp_int($argHash{x},$argHash{rate},$argHash{log},$ppret);
+                       return $ppret; } ',
+      );
+
+# Note: This function matches the R calling convention of pexp
+#       and not the pure library version (rate vs 1/rate)
+pp_def("pexp",
+       Pars => 'q(); rate(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double pexp(double, double, int, int);;
+           $ppret() = pexp((double)$q(),1/(double)$rate(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::pexp {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, rate=1, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_pexp_int($argHash{q},$argHash{rate},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+# Note: This function matches the R calling convention of qexp
+#       and not the pure library version (rate vs 1/rate)
+pp_def("qexp",
+       Pars => 'p(); rate(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qexp(double, double, int, int);;
+                $ppret() = qexp((double)$p(),1/(double)$rate(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qexp {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, rate=1, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_qexp_int($argHash{p},$argHash{rate},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+# Note: This function matches the R calling convention of rexp
+#       and not the pure library version (rate vs 1/rate)
+pp_def("rexp",
+       Pars => 'N(n); rate();  double [o]ppret(n)',
+       Code => 'extern double rexp(double);;
+                loop(n) %{ $ppret() = rexp(1/(double)$rate()); %} ',
+       PMCode => '
+            sub PDL::R::math::rexp {
+               my ($i,$a) = @_;
+               my $c=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_rexp_int($i,$a,$c);
+               return $c;
+            } ',
+      );
+
+pp_def("dgeom",
+       Pars => 'x(); prob(); log();  double [o]ppret()',
+       Code => 'extern double dgeom(double, double, int);;
+                $ppret() = dgeom((double)$x(),(double)$prob(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::dgeom {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, prob, log=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_dgeom_int($argHash{x},$argHash{prob},$argHash{log},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("pgeom",
+       Pars => 'q(); prob(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double pgeom(double, double, int, int);;
+                $ppret() = pgeom((double)$q(),(double)$prob(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::pgeom {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, prob, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_pgeom_int($argHash{q},$argHash{prob},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("qgeom",
+       Pars => 'p(); prob(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qgeom(double, double, int, int);;
+                $ppret() = qgeom((double)$p(),(double)$prob(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qgeom {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, prob, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_qgeom_int($argHash{p},$argHash{prob},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("rgeom",
+       Pars => 'N(n); prob();  double [o]ppret(n)',
+       Code => 'extern double rgeom(double);;
+                loop(n) %{ $ppret() = rgeom((double)$prob()); %} ',
+       PMCode => '
+            sub PDL::R::math::rgeom {
+               my ($i,$a) = @_;
+               my $c=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_rgeom_int($i,$a,$c);
+               return $c;
+            } ',
+      );
+
+pp_def("dhyper",
+       Pars => 'x(); m(); N(); k(); log();  double [o]ppret()',
+       Code => 'extern double dhyper(double, double, double, double, int);;
+                $ppret() = dhyper((double)$x(),(double)$m(),(double)$N(),(double)$k(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::dhyper {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, m, n, k, log=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_dhyper_int($argHash{x},$argHash{m},$argHash{n},$argHash{k},$argHash{log},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("phyper",
+       Pars => 'q(); m(); N(); k(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double phyper(double, double, double, double, int, int);;
+                $ppret() = phyper((double)$q(),(double)$m(),(double)$N(),(double)$k(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::phyper {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, m, n, k, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_phyper_int($argHash{q},$argHash{m},$argHash{n},$argHash{k},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("qhyper",
+       Pars => 'p(); m(); N(); k(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qhyper(double, double, double, double, int, int);;
+                $ppret() = qhyper((double)$p(),(double)$m(),(double)$N(),(double)$k(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qhyper {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, m, n, k, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_qhyper_int($argHash{p},$argHash{m},$argHash{n},$argHash{k},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("rhyper",
+       Pars => 'nn(n); m(); N(); k();  double [o]ppret(n)',
+       Code => 'extern double rhyper(double, double, double);;
+                loop(n) %{ $ppret() = rhyper((double)$m(),(double)$N(),(double)$k()); %} ',
+       PMCode => '
+            sub PDL::R::math::rhyper {
+               my ($i,$a,$b,$c) = @_;
+               my $z=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_rhyper_int($i,$a,$b,$c,$z);
+               return $z;
+            } ',
+      );
+
+pp_def("dnbinom",
+       Pars => 'x(); size(); prob(); log();  double [o]ppret()',
+       Code => 'extern double dnbinom(double, double, double, int);;
+                $ppret() = dnbinom((double)$x(),(double)$size(),(double)$prob(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::dnbinom {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, size, prob=0, log=0, mu=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       if ($argHash{mu})
+                         {
+                           if ($argHash{prob})
+                             { return $ppret; }  #CROAK "Both prob and mu specified"
+                           else
+                             { $argHash{prob}=$argHash{size}/($argHash{size}+$argHash{mu}); }
+                         }
+                       &PDL::R::math::_dnbinom_int($argHash{x},$argHash{size},$argHash{prob},$argHash{log},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("pnbinom",
+       Pars => 'q(); size(); prob(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double pnbinom(double, double, double, int, int);;
+                $ppret() = pnbinom((double)$q(),(double)$size(),(double)$prob(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::pnbinom {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, size, prob=0, lower_tail=1, log_p=0, mu=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       if (exists($argHash{mu}))
+                         {
+                           if (exists($argHash{prob}))
+                             { return $ppret; }  #CROAK "Both prob and mu specified"
+                           else
+                             { $argHash{prob}=$argHash{size}/($argHash{size}+$argHash{mu}); }
+                         }
+                       &PDL::R::math::_pnbinom_int($argHash{q},$argHash{size},$argHash{prob},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("qnbinom",
+       Pars => 'p(); size(); prob(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qnbinom(double, double, double, int, int);;
+                $ppret() = qnbinom((double)$p(),(double)$size(),(double)$prob(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qnbinom {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, size, prob=0, lower_tail=1, log_p=0, mu=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       if (exists($argHash{mu}))
+                         {
+                           if (exists($argHash{prob}))
+                             { return $ppret; }  #CROAK "Both prob and mu specified"
+                           else
+                             { $argHash{prob}=$argHash{size}/($argHash{size}+$argHash{mu}); }
+                         }
+                       &PDL::R::math::_qnbinom_int($argHash{p},$argHash{size},$argHash{prob},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("rnbinom",
+       Pars => 'size(n); prob(); mu();  double [o]ppret(n)',
+       Code => 'extern double rnbinom(double, double);;
+                loop(n) %{ $ppret() = rnbinom((double)$prob(),(double)$mu()); %} ',
+       PMCode => '
+            sub PDL::R::math::rnbinom {
+               my ($i,$a,$b) = @_;
+               my $c=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_rnbinom_int($i,$a,$b,$c);
+               return $c;
+            } ',
+      );
+
+pp_def("dpois",
+       Pars => 'x(); lambda(); log();  double [o]ppret()',
+       Code => 'extern double dpois(double, double, int);;
+                $ppret() = dpois((double)$x(),(double)$lambda(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::dpois {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, lambda, log=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_dpois_int($argHash{x},$argHash{lambda},$argHash{log},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("ppois",
+       Pars => 'q(); lambda(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double ppois(double, double, int, int);;
+                $ppret() = ppois((double)$q(),(double)$lambda(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::ppois {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, lambda, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_ppois_int($argHash{q},$argHash{lambda},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("qpois",
+       Pars => 'p(); lambda(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qpois(double, double, int, int);;
+                $ppret() = qpois((double)$p(),(double)$lambda(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qpois {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, lambda, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_qpois_int($argHash{p},$argHash{lambda},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("rpois",
+       Pars => 'N(n); lambda();  double [o]ppret(n)',
+       Code => 'extern double rpois(double);;
+                loop(n) %{ $ppret() = rpois((double)$lambda()); %} ',
+       PMCode => '
+            sub PDL::R::math::rpois {
+               my ($i,$a) = @_;
+               my $c=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_rpois_int($i,$a,$c);
+               return $c;
+            } ',
+      );
+
+pp_def("dweibull",
+       Pars => 'x(); shape(); scale(); log();  double [o]ppret()',
+       Code => 'extern double dweibull(double, double, double, int);;
+                $ppret() = dweibull((double)$x(),(double)$shape(),(double)$scale(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::dweibull {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, shape, scale=1, log=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_dweibull_int($argHash{x},$argHash{shape},$argHash{scale},$argHash{log},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("pweibull",
+       Pars => 'q(); shape(); scale(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double pweibull(double, double, double, int, int);;
+                $ppret() = pweibull((double)$q(),(double)$shape(),(double)$scale(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::pweibull {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, shape, scale=1, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_pweibull_int($argHash{q},$argHash{shape},$argHash{scale},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("qweibull",
+       Pars => 'p(); shape(); scale(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qweibull(double, double, double, int, int);;
+                $ppret() = qweibull((double)$p(),(double)$shape(),(double)$scale(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qweibull {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, shape, scale=1, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_qweibull_int($argHash{p},$argHash{shape},$argHash{scale},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("rweibull",
+       Pars => 'N(n); shape(); scale();  double [o]ppret(n)',
+       Code => 'extern double rweibull(double, double);;
+                loop(n) %{ $ppret() = rweibull((double)$shape(),(double)$scale()); %} ',
+       PMCode => '
+            sub PDL::R::math::rweibull {
+               my ($i,$a,$b) = @_;
+               my $c=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_rweibull_int($i,$a,$b,$c);
+               return $c;
+            } ',
+      );
+
+pp_def("dlogis",
+       Pars => 'x(); location(); scale(); log();  double [o]ppret()',
+       Code => 'extern double dlogis(double, double, double, int);;
+                $ppret() = dlogis((double)$x(),(double)$location(),(double)$scale(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::dlogis {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, location=0, scale=1, log=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_dlogis_int($argHash{x},$argHash{location},$argHash{scale},$argHash{log},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("plogis",
+       Pars => 'q(); location(); scale(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double plogis(double, double, double, int, int);;
+                $ppret() = plogis((double)$q(),(double)$location(),(double)$scale(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::plogis {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, location=0, scale=1, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_plogis_int($argHash{q},$argHash{location},$argHash{scale},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("qlogis",
+       Pars => 'p(); location(); scale(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qlogis(double, double, double, int, int);;
+                $ppret() = qlogis((double)$p(),(double)$location(),(double)$scale(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qlogis {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, location=0, scale=1, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_qlogis_int($argHash{p},$argHash{location},$argHash{scale},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("rlogis",
+       Pars => 'N(n); location(); scale();  double [o]ppret(n)',
+       Code => 'extern double rlogis(double, double);;
+                loop(n) %{ $ppret() = rlogis((double)$location(),(double)$scale()); %} ',
+       PMCode => '
+            sub PDL::R::math::rlogis {
+               my ($i,$a,$b) = @_;
+               my $c=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_rlogis_int($i,$a,$b,$c);
+               return $c;
+            } ',
+      );
+
+pp_def("dnbeta",
+       Pars => 'a(); b(); c(); d(); e();  double [o]ppret()',
+       Code => ' extern double dnbeta(double, double, double, double, int);;
+                 $ppret() = dnbeta((double)$a(),(double)$b(),(double)$c(),(double)$d(),(int)$e()); ',
+      );
+
+pp_def("pnbeta",
+       Pars => 'a(); b(); c(); d(); e(); f();  double [o]ppret()',
+       Code => ' extern double pnbeta(double, double, double, double, int, int);;
+                 $ppret() = pnbeta((double)$a(),(double)$b(),(double)$c(),(double)$d(),(int)$e(),(int)$f()); ',
+      );
+
+#pp_def("qnbeta",
+#       Pars => 'a(); b(); c(); d(); e(); f();  double [o]ppret()',
+#       Code => '
+#            extern double qnbeta(double, double, double, double, int, int);;
+#                 $ppret() = qnbeta((double)$a(),(double)$b(),(double)$c(),(double)$d(),(int)$e(),(int)$f());
+#');
+
+#pp_def("rnbeta",
+#       Pars => 'i(n); a(); b(); c();  double [o]ppret(n)',
+#       Code => '
+#            extern double rnbeta(double, double, double);;
+#                loop(n) %{ $ppret() = rnbeta((double)$a(),(double)$b(),(double)$c()); %}
+#',
+#       PMCode => '
+#            sub PDL::R::rnbeta {
+#               my ($i,$a,$b,$c) = @_;
+#               my $z=PDL->null;
+#               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+#               &PDL::R::_rnbeta_int($i,$a,$b,$c,$z);
+#               return $z;
+#            }
+#');
+
+
+pp_def("pnf",
+       Pars => 'a(); b(); c(); d(); e(); f();  double [o]ppret()',
+       Code => ' extern double pnf(double, double, double, double, int, int);;
+                 $ppret() = pnf((double)$a(),(double)$b(),(double)$c(),(double)$d(),(int)$e(),(int)$f()); ',
+      );
+
+#pp_def("qnf",
+#       Pars => 'a(); b(); c(); d(); e(); f();  double [o]ppret()',
+#       Code => '
+#            extern double qnf(double, double, double, double, int, int);;
+#                 $ppret() = qnf((double)$a(),(double)$b(),(double)$c(),(double)$d(),(int)$e(),(int)$f());
+#');
+
+
+pp_def("pnt",
+       Pars => 'a(); b(); c(); d(); e();  double [o]ppret()',
+       Code => ' extern double pnt(double, double, double, int, int);;
+                 $ppret() = pnt((double)$a(),(double)$b(),(double)$c(),(int)$d(),(int)$e()); ',
+      );
+
+#pp_def("qnt",
+#       Pars => 'a(); b(); c(); d(); e();  double [o]ppret()',
+#       Code => '
+#            extern double qnt(double, double, double, int, int);;
+#                 $ppret() = qnt((double)$a(),(double)$b(),(double)$c(),(int)$d(),(int)$e());
+#');
+
+# Note: This function matches the R calling convention of ptukey
+#       and not the pure library version (ie. nmeans, nrages & df ordering)
+pp_def("ptukey",
+       Pars => 'q(); nmeans(); df(); nranges(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double ptukey(double, double, double, double, int, int);;
+                $ppret() = ptukey((double)$q(),(double)$nranges(),(double)$nmeans(),(double)$df(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::ptukey {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, nmeans, df, nranges=1, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_ptukey_int($argHash{q},$argHash{nmeans},$argHash{df},$argHash{nranges},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+# Note: This function matches the R calling convention of qtukey
+#       and not the pure library version (ie. nmeans, nrages & df ordering)
+pp_def("qtukey",
+       Pars => 'p(); nmeans(); df(); nranges(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qtukey(double, double, double, double, int, int);;
+                $ppret() = qtukey((double)$p(),(double)$nranges(),(double)$nmeans(),(double)$df(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qtukey {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, nmeans, df, nranges=1, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_qtukey_int($argHash{p},$argHash{nmeans},$argHash{df},$argHash{nranges},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("dwilcox",
+       Pars => 'x(); m(); N(); log();  double [o]ppret()',
+       Code => 'extern double dwilcox(double, double, double, int);;
+                $ppret() = dwilcox((double)$x(),(double)$m(),(double)$N(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::dwilcox {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, m, n, log=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_dwilcox_int($argHash{x},$argHash{m},$argHash{n},$argHash{log},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("pwilcox",
+       Pars => 'q(); m(); N(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double pwilcox(double, double, double, int, int);;
+                $ppret() = pwilcox((double)$q(),(double)$m(),(double)$N(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::pwilcox {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, m, n, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_pwilcox_int($argHash{q},$argHash{m},$argHash{n},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("qwilcox",
+       Pars => 'p(); m(); N(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qwilcox(double, double, double, int, int);;
+                $ppret() = qwilcox((double)$p(),(double)$m(),(double)$N(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qwilcox {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, m, n, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_qwilcox_int($argHash{p},$argHash{m},$argHash{n},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("rwilcox",
+       Pars => 'Nn(n); m(); N();  double [o]ppret(n)',
+       Code => 'extern double rwilcox(double, double);;
+                loop(n) %{ $ppret() = rwilcox((double)$m(),(double)$N()); %} ',
+       PMCode => '
+            sub PDL::R::math::rwilcox {
+               my ($i,$a,$b) = @_;
+               my $c=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_rwilcox_int($i,$a,$b,$c);
+               return $c;
+            } ',
+      );
+
+pp_def("dsignrank",
+       Pars => 'x(); N(); log();  double [o]ppret()',
+       Code => 'extern double dsignrank(double, double, int);;
+                $ppret() = dsignrank((double)$x(),(double)$N(),(int)$log()); ',
+       PMCode => 'sub PDL::R::math::dsignrank {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, n, log=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_dsignrank_int($argHash{x},$argHash{n},$argHash{log},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("psignrank",
+       Pars => 'q(); N(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double psignrank(double, double, int, int);;
+                $ppret() = psignrank((double)$q(),(double)$N(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::psignrank {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("q, n, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_psignrank_int($argHash{q},$argHash{n},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("qsignrank",
+       Pars => 'p(); N(); lower_tail(); log_p();  double [o]ppret()',
+       Code => 'extern double qsignrank(double, double, int, int);;
+                $ppret() = qsignrank((double)$p(),(double)$N(),(int)$lower_tail(),(int)$log_p()); ',
+       PMCode => 'sub PDL::R::math::qsignrank {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("p, n, lower_tail=1, log_p=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_qsignrank_int($argHash{p},$argHash{n},$argHash{lower_tail},$argHash{log_p},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("rsignrank",
+       Pars => 'Nn(n); N();  double [o]ppret(n)',
+       Code => 'extern double rsignrank(double);;
+                loop(n) %{ $ppret() = rsignrank((double)$N()); %} ',
+       PMCode => '
+            sub PDL::R::math::rsignrank {
+               my ($i,$a) = @_;
+               my $c=PDL->null;
+               $i=ones($i) unless UNIVERSAL::isa($i,"PDL");
+               &PDL::R::math::_rsignrank_int($i,$a,$c);
+               return $c;
+            } ',
+      );
+
+pp_def("gamma",
+       Pars => 'x();  double [o]ppret()',
+       Code => ' extern double gammafn(double);;
+                 $ppret() = gammafn((double)$x()); ',
+       PMCode => 'sub PDL::R::math::gamma {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_gamma_int($argHash{x},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("lgamma",
+       Pars => 'x();  double [o]ppret()',
+       Code => ' extern double lgammafn(double);;
+                 $ppret() = lgammafn((double)$x()); ',
+       PMCode => 'sub PDL::R::math::lgamma {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_lgamma_int($argHash{x},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("digamma",
+       Pars => 'x();  double [o]ppret()',
+       Code => ' extern double digamma(double);;
+                 $ppret() = digamma((double)$x()); ',
+       PMCode => 'sub PDL::R::math::digamma {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_digamma_int($argHash{x},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("trigamma",
+       Pars => 'x();  double [o]ppret()',
+       Code => ' extern double trigamma(double);;
+                 $ppret() = trigamma((double)$x()); ',
+       PMCode => 'sub PDL::R::math::trigamma {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_trigamma_int($argHash{x},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("tetragamma",
+       Pars => 'x();  double [o]ppret()',
+       Code => ' extern double tetragamma(double);;
+                 $ppret() = tetragamma((double)$x()); ',
+       PMCode => 'sub PDL::R::math::tetragamma {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_tetragamma_int($argHash{x},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("pentagamma",
+       Pars => 'x();  double [o]ppret()',
+       Code => ' extern double pentagamma(double);;
+                 $ppret() = pentagamma((double)$x()); ',
+       PMCode => 'sub PDL::R::math::pentagamma {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_pentagamma_int($argHash{x},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("beta",
+       Pars => 'a(); b();  double [o]ppret()',
+       Code => ' extern double beta(double, double);;
+                 $ppret() = beta((double)$a(),(double)$b()); ',
+       PMCode => 'sub PDL::R::math::beta {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("a, b", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_beta_int($argHash{a},$argHash{b},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("lbeta",
+       Pars => 'a(); b();  double [o]ppret()',
+       Code => ' extern double lbeta(double, double);;
+                 $ppret() = lbeta((double)$a(),(double)$b()); ',
+       PMCode => 'sub PDL::R::math::lbeta {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("a, b", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_lbeta_int($argHash{a},$argHash{b},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("choose",
+       Pars => 'n(); k();  double [o]ppret()',
+       Code => ' extern double choose(double, double);;
+                 $ppret() = choose((double)$n(),(double)$k()); ',
+       PMCode => 'sub PDL::R::math::choose {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("n, k", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_choose_int($argHash{n},$argHash{k},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("lchoose",
+       Pars => 'n(); k();  double [o]ppret()',
+       Code => ' extern double lchoose(double, double);;
+                 $ppret() = lchoose((double)$n(),(double)$k()); ',
+       PMCode => 'sub PDL::R::math::lchoose {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("n, k", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_lchoose_int($argHash{n},$argHash{k},$ppret);
+                       return $ppret; } ',
+      );
+
+# Note: This function matches the R calling convention of dbesselI
+#       and not the pure library version
+pp_def("besselI",
+       Pars => 'x(); nu(); expon_scaled();  double [o]ppret()',
+       Code => 'extern double bessel_i(double, double, double);;
+                $ppret() = bessel_i((double)$x(),(double)$nu(),1+(double)$expon_scaled()); ',
+       PMCode => 'sub PDL::R::math::besselI {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, nu, expon_scaled=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_besselI_int($argHash{x},$argHash{nu},$argHash{expon_scaled},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("besselJ",
+       Pars => 'x(); nu();  double [o]ppret()',
+       Code => 'extern double bessel_j(double, double);;
+                $ppret() = bessel_j((double)$x(),(double)$nu()); ',
+       PMCode => 'sub PDL::R::math::besselJ {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, nu", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_besselJ_int($argHash{x},$argHash{nu},$ppret);
+                       return $ppret; } ',
+      );
+
+# Note: This function matches the R calling convention of dbesselI
+#       and not the pure library version
+pp_def("besselK",
+       Pars => 'x(); nu(); expon_scaled();  double [o]ppret()',
+       Code => 'extern double bessel_k(double, double, double);;
+                $ppret() = bessel_k((double)$x(),(double)$nu(),1+(double)$expon_scaled()); ',
+       PMCode => 'sub PDL::R::math::besselK {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, nu, expon_scaled=0", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_besselK_int($argHash{x},$argHash{nu},$argHash{expon_scaled},$ppret);
+                       return $ppret; } ',
+      );
+
+pp_def("besselY",
+       Pars => 'x(); nu();  double [o]ppret()',
+       Code => 'extern double bessel_y(double, double);;
+                $ppret() = bessel_y((double)$x(),(double)$nu()); ',
+       PMCode => 'sub PDL::R::math::besselY {
+                       my ($status,%argHash) = &PDL::NamedArgs::parseArgs("x, nu", @_);
+                       #CROAK if $status;
+                       my $ppret=PDL->null;
+                       &PDL::R::math::_besselY_int($argHash{x},$argHash{nu},$ppret);
+                       return $ppret; } ',
+      );
+
+#pp_def("pythag",
+#       Pars => 'a(); b();  double [o]ppret()',
+#       Code => '
+#            extern double  pythag(double, double);;
+#                 $ppret() = pythag((double)$a(),(double)$b());
+#');
+
+pp_def("log1p",
+       Pars => 'x();  double [o]ppret()',
+       Code => 'extern double  log1p(double); /* = log(1+x) {care for small x} */;
+                $ppret() = log1p((double)$x()); ',
+      );
+
+#pp_def("imax2",
+#       Pars => 'a(); b();  double [o]ppret()',
+#       Code => '
+#            extern int        imax2(int, int);;
+#                 $ppret() = imax2((int)$a(),(int)$b());
+#');
+#    
+#pp_def("imin2",
+#       Pars => 'a(); b();  double [o]ppret()',
+#       Code => '
+#            extern int        imin2(int, int);;
+#                 $ppret() = imin2((int)$a(),(int)$b());
+#');
+#    
+#pp_def("fmax2",
+#       Pars => 'a(); b();  double [o]ppret()',
+#       Code => '
+#            extern double fmax2(double, double);;
+#                 $ppret() = fmax2((double)$a(),(double)$b());
+#');
+#    
+#pp_def("fmin2",
+#       Pars => 'a(); b();  double [o]ppret()',
+#       Code => '
+#            extern double fmin2(double, double);;
+#                 $ppret() = fmin2((double)$a(),(double)$b());
+#');
+#    
+#pp_def("sign",
+#       Pars => 'a();  double [o]ppret()',
+#       Code => '
+#            extern double sign(double);;
+#                 $ppret() = sign((double)$a());
+#');
+#    
+#pp_def("fprec",
+#       Pars => 'a(); b();  double [o]ppret()',
+#       Code => '
+#            extern double fprec(double, double);;
+#                 $ppret() = fprec((double)$a(),(double)$b());
+#');
+#    
+#pp_def("fround",
+#       Pars => 'a(); b();  double [o]ppret()',
+#       Code => '
+#            extern double fround(double, double);;
+#                 $ppret() = fround((double)$a(),(double)$b());
+#');
+#    
+#pp_def("fsign",
+#       Pars => 'a(); b();  double [o]ppret()',
+#       Code => '
+#            extern double fsign(double, double);;
+#                 $ppret() = fsign((double)$a(),(double)$b());
+#');
+#    
+#pp_def("ftrunc",
+#       Pars => 'a();  double [o]ppret()',
+#       Code => '
+#            extern double ftrunc(double);;
+#                 $ppret() = ftrunc((double)$a());
+#');
+1;

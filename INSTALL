@@ -1,0 +1,25 @@
+
+In order to build this module you need to build the source for R. I have
+been using R version 1.3 but I think anything above 1.2 is probably ok.
+
+Source for R can be obtained at www.r-project.org
+
+
+Steps To Build
+--------------
+0. Build & install PDL::NamedArgs
+1. Build R (ie. ./configure; make)
+2. Build R nmath standalone
+   cd <to wherever the root of the R source code is>
+   cd src/nmath/standalone
+   make
+3. Edit the Makefile.PL to set the Rlocation variable
+   to the path to the R source code root.
+4. perl Makefile.PL
+5. make
+6. perl testPDL.pl
+7. make install
+8. Have fun....
+
+
+--John Cavanaugh (cavanaug@users.sourceforge.net)

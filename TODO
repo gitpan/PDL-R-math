@@ -1,0 +1,40 @@
+
+Lots of stuff TODO
+==================
+- Add some type of error conditions using carp/croak/die
+  for invalid arguments
+- Support namedargs for the r<dist> functions
+- Write a perl hack to automatically extract docs for functions
+  from R and generate DOCS section for ppdef
+- Work with the R project to see if the library can be built such
+  that both projects can share the same *.so file.
+- Create PDL::R as a basic container class
+- Create PDL::R::funcs to support translated R functions
+  probably using PDL::Autoload
+
+
+Wishlist Items
+==============
+- Utilize the BadCode section to provide BAD support.
+- Translate some of the *.R functions into perl.  Im especially 
+  interested in glm.  If someone wants to volunteer that would
+  be EXCELLENT!!
+- Develop PDL::Graphics::R to support R's builtin graphics
+
+
+Recently Completed
+==================
+- Utilize the PMCode sections and write Perl wrappers to handle
+  variable argument passing with defaults that match R
+- Make the pars arguments mimic the names of the R arguments
+- Write ppdefs for all the r<distribution> functions that I
+  omittied first time thru
+- Ensure that all functions are returning doubles even if they
+  are passed ints.  (This causes problems with the beta function
+  etc)
+- Fix the PPCode sections to fix the calling order & perform
+  arithmetic operations for ptukey, qtukey, besselI, besselJ,
+  dexp, pexp, & qexp to match the R defaults
+
+
+--John Cavanaugh (john-cavanaugh@home.com)
