@@ -1,9 +1,7 @@
-our $VERSION = '0.11';
 pp_bless('PDL::R::math');  # Put in our namespace not PDL's
 
-#pp_setversion(0.10);
-
 pp_addpm({At=>Top},<<'EOD');
+#our $VERSION = '0.12';
 
 =head1 NAME
 

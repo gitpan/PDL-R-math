@@ -8,11 +8,11 @@ $hash{MYEXTLIB}  = "${Rlocation}/src/nmath/standalone/libRmath.a";
 use PDL::Core::Dev;            # Pick up development utilities
 use ExtUtils::MakeMaker;
 
-$package = ["rmath.pd",math,PDL::R::math];
+$package = ["rmath.pd",'math','PDL::R::math'];
 %hash = pdlpp_stdargs($package);
 #$hash{OBJECT} .= ' additional_Ccode$(OBJ_EXT) ';
 $hash{clean}->{FILES} .= ' todelete_Ccode$(OBJ_EXT) ';
-$hash{'VERSION_FROM'} = 'rmath.pd';
+$hash{'VERSION'} = '0.12';
 #$hash{INC} .= " -I${Rlocation}/include -I./include ";
 $hash{INC} .= " -I./include ";   # The default Rmath.h file has some issues, need to
                                  # follow up with R group to fix...

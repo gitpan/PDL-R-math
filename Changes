@@ -1,0 +1,7 @@
+Revision history for Perl extension PDL::R::math.
+
+0.12  Sat Jul 28 22:41:02 PDT 2001
+	- Cleaned up the version problems so things should work now
+
+0.00-0.11 Jul 2001 
+	- Initial revs and first update to CPAN
